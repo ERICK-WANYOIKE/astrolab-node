@@ -53,7 +53,7 @@ mongoose
 server.get(
     '/',                        // http://localhost:3001/
     (req, res) => { 
-        res.send("<html><head><title>Home</title></head><body><h1>Welcome to Dany's Website</h1></body></html>")
+        res.send("<html><head><title>Home</title></head><body><h1>Welcome to The Website</h1></body></html>")
     }
 );
 
