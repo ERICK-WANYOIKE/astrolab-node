@@ -27,7 +27,7 @@ const productRoutes = require('./routes/product-routes.js');
 
 
 // NOTE: Make sure to enter your connection string.
-const connectionString = "mongodb+srv://admin01:db12345@cluster0.oikl7.mongodb.net/astro_jul2021?retryWrites=true&w=majority";
+const connectionString = process.env.MONGODB_CONNECTION_STRING;
 
 const connectionConfig = {
     useNewUrlParser: true,
