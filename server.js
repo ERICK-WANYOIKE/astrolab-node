@@ -5,12 +5,60 @@ const express = require('express');
 const cors = require('cors');
 // dotenv will allow Express to read Environment Variables
 require('dotenv').config();
-
 // Cloudinary is the CDN (Content Delivery Network) service
 const cloudinary = require('cloudinary').v2;
-
 // express-form-data will allow files to be sent
 const expressFormData = require('express-form-data');
+// passport and passport-jwt for user authentication
+const passport = require('passport');
+const JwtStrategy = require('passport-jwt').Strategy;
+const ExtractJwt = require('passport-jwt').ExtractJwt;
+const jwtSecret = process.env.JWT_SECRET;
+
+// This will tell passport where to find the jsonwebtoken
+// and how to extract the payload
+const passportJwtOptions = {
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    secretOrKey: jwtSecret,
+}
+
+// This function will tell passport how what to do
+// with the payload.
+const passportJwt = (passport) => {
+    passport.use(
+        new JwtStrategy(
+            passportJwtOptions,
+            (jwtPayload, done) => {
+
+                // Tell passport what to do with payload
+                UserModel
+                .findOne({ _id: jwtPayload._id })
+                .then(
+                    (dbDocument) => {
+                        // The done() function will pass the 
+                        // dbDocument to Express. The user's 
+                        // document can then be access via req.user
+                        return done(null, dbDocument)
+                    }
+                )
+                .catch(
+                    (err) => {
+                        // If the _id or anything is invalid,
+                        // pass 'null' to Express.
+                        if(err) {
+                            console.log(err);
+                        }
+                        return done(null, null)
+                    }
+                )
+
+            }
+        )
+    )
+};
+passportJwt(passport)
+
+
 
 // This will make 'server' an object with methods 
 // for server operations
@@ -76,6 +124,24 @@ server.get(
     }
 );
 
+server.get(
+    '/products/:id',                        // http://localhost:3001/
+    (req, res) => { 
+
+        const id = req.params.id;
+        const price = req.query.price;
+        const ratings = req.query.ratings;
+
+        const product = {
+            iphone: 'Apple iPhone 12',
+            s21: 'Samsung Galaxy 21',
+            px22: 'Turtle Beach PX22 Headset'
+        }
+
+        res.send(`<html><head><title>products</title></head><body><h1>Product: ${product[id]}</h1>Price is: ${price} <br/> Ratings: ${ratings}</body></html>`)
+    }
+);
+
 
 server.use(
     '/users', userRoutes
@@ -84,6 +150,8 @@ server.use(
 server.use(
     '/products', productRoutes
 );
+
+
 
 
 // The .listen() will connect the server
